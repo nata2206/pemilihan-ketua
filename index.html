@@ -3,46 +3,69 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pemilihan Ketua OSIS</title>
+<title>Pemilihan Ketua MANEL - Aman</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-.card img { height: 160px; object-fit: cover; }
-.btn-vote { background-color: hotpink; border: none; color: white; width: 100%; }
-.btn-vote:hover { background-color: deeppink; }
+body {
+    background: linear-gradient(135deg, #003366, #00509E);
+    color: white;
+    font-family: 'Segoe UI', sans-serif;
+}
+.card {
+    border: none;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    background: white;
+}
+.card img { height: 180px; object-fit: cover; }
+.card-body { color: black; }
+.btn-vote {
+    background: #FFD700; border: none; color: black;
+    font-weight: bold; border-radius: 10px;
+}
+.btn-vote:hover { background: #FFC107; }
 .hidden { display: none; }
+.admin-section {
+    background: white; color: black;
+    border-radius: 15px; padding: 15px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
 </style>
 </head>
-<body class="bg-light">
+<body>
 
-<div class="container py-3">
-    <h3 class="text-center mb-3">Pemilihan Ketua OSIS</h3>
+<div class="container py-4">
+    <h2 class="text-center mb-4 fw-bold">Pemilihan Ketua MANEL</h2>
 
     <!-- Login Pemilih -->
-    <div id="loginPemilih">
+    <div id="loginPemilih" class="text-center">
         <input id="namaPemilih" class="form-control mb-2" placeholder="Masukkan Nama">
-        <button class="btn btn-primary w-100" onclick="mulaiVoting()">Mulai Voting</button>
+        <input id="kodePemilih" class="form-control mb-3" placeholder="Masukkan Kode Unik">
+        <button class="btn btn-warning w-100 mb-3" onclick="cekKode()">Mulai Voting</button>
         <hr>
-        <button class="btn btn-secondary w-100" onclick="tampilLoginAdmin()">Login Admin</button>
+        <button class="btn btn-light w-100" onclick="tampilLoginAdmin()">Login Admin</button>
     </div>
 
     <!-- Voting -->
     <div id="halamanVoting" class="hidden">
         <div class="row g-3">
-            <div class="col-6">
+            <div class="col-md-6 col-12">
                 <div class="card">
-                    <img src="https://via.placeholder.com/300x200?text=Kandidat+1">
+                    <img src="https://via.placeholder.com/400x250?text=Kandidat+1">
                     <div class="card-body text-center">
-                        <h6>Kandidat 1</h6>
-                        <button class="btn btn-vote" onclick="pilih('Kandidat 1')">Pilih</button>
+                        <h5 class="fw-bold">Kandidat 1</h5>
+                        <button class="btn btn-vote w-100" onclick="pilih('Kandidat 1')">Pilih</button>
                     </div>
                 </div>
             </div>
-            <div class="col-6">
+            <div class="col-md-6 col-12">
                 <div class="card">
-                    <img src="https://via.placeholder.com/300x200?text=Kandidat+2">
+                    <img src="https://via.placeholder.com/400x250?text=Kandidat+2">
                     <div class="card-body text-center">
-                        <h6>Kandidat 2</h6>
-                        <button class="btn btn-vote" onclick="pilih('Kandidat 2')">Pilih</button>
+                        <h5 class="fw-bold">Kandidat 2</h5>
+                        <button class="btn btn-vote w-100" onclick="pilih('Kandidat 2')">Pilih</button>
                     </div>
                 </div>
             </div>
@@ -50,39 +73,60 @@
     </div>
 
     <!-- Login Admin -->
-    <div id="loginAdmin" class="hidden">
-        <input id="adminUser" class="form-control mb-2" placeholder="Username">
-        <input id="adminPass" type="password" class="form-control mb-2" placeholder="Password">
-        <button class="btn btn-success w-100" onclick="loginAdmin()">Login Admin</button>
+    <div id="loginAdmin" class="hidden text-center">
+        <div class="admin-section">
+            <h5 class="fw-bold mb-3">Login Admin</h5>
+            <input id="adminUser" class="form-control mb-2" placeholder="Username">
+            <input id="adminPass" type="password" class="form-control mb-3" placeholder="Password">
+            <button class="btn btn-success w-100" onclick="loginAdmin()">Login</button>
+        </div>
     </div>
 
     <!-- Halaman Admin -->
-    <div id="halamanAdmin" class="hidden">
-        <h5>Data Pemilih</h5>
-        <table class="table table-bordered">
-            <thead><tr><th>Nama</th><th>Pilihan</th><th>Waktu</th></tr></thead>
-            <tbody id="dataPemilih"></tbody>
-        </table>
+    <div id="halamanAdmin" class="hidden admin-section mt-4">
+        <h5 class="fw-bold">📋 Data Pemilih</h5>
+        <div class="table-responsive">
+            <table class="table table-bordered table-sm table-striped mt-2">
+                <thead class="table-dark">
+                    <tr><th>Nama</th><th>Pilihan</th><th>Waktu</th></tr>
+                </thead>
+                <tbody id="dataPemilih"></tbody>
+            </table>
+        </div>
+        <hr>
+        <h5 class="fw-bold">📊 Grafik Hasil Voting</h5>
+        <canvas id="grafikVoting" height="120"></canvas>
     </div>
 </div>
 
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxlPvRvnSjektxnj4JId2nfKQ2g4sbI5CaKDXX3z1Q07alT4H0msMDguNQww3Gzordotw/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxBp7bVdKREdvhoO0dd3f4ZHw5FWdhm0L9nqy6p_1j_UCYK-bGDAhJUDXBlsnqO1sSw8w/exec";
 let namaPemilih = "";
+let kodePemilih = "";
 
-// Mulai voting
-function mulaiVoting(){
+// Cek kode unik
+function cekKode(){
     namaPemilih = document.getElementById("namaPemilih").value.trim();
-    if(namaPemilih === "") return alert("Masukkan nama Anda!");
-    document.getElementById("loginPemilih").classList.add("hidden");
-    document.getElementById("halamanVoting").classList.remove("hidden");
+    kodePemilih = document.getElementById("kodePemilih").value.trim();
+    if(namaPemilih==="" || kodePemilih==="") return alert("Masukkan Nama & Kode Unik!");
+
+    fetch(`${SCRIPT_URL}?action=cek&nama=${encodeURIComponent(namaPemilih)}&kode=${encodeURIComponent(kodePemilih)}`)
+    .then(res=>res.json())
+    .then(data=>{
+        if(data.status==="ok"){
+            document.getElementById("loginPemilih").classList.add("hidden");
+            document.getElementById("halamanVoting").classList.remove("hidden");
+        } else {
+            alert(data.pesan);
+        }
+    });
 }
 
 // Pilih kandidat
 function pilih(kandidat){
     fetch(SCRIPT_URL, {
         method: 'POST',
-        body: JSON.stringify({nama: namaPemilih, kandidat: kandidat})
+        body: JSON.stringify({nama: namaPemilih, kode: kodePemilih, kandidat: kandidat})
     }).then(res=>res.json())
     .then(data=>{
         alert(data.pesan);
@@ -96,7 +140,7 @@ function tampilLoginAdmin(){
     document.getElementById("loginAdmin").classList.remove("hidden");
 }
 
-// Login admin (2 admin)
+// Login admin
 function loginAdmin(){
     const user = document.getElementById("adminUser").value;
     const pass = document.getElementById("adminPass").value;
@@ -109,16 +153,34 @@ function loginAdmin(){
     }
 }
 
-// Load data pemilih dari Google Sheets
+// Load data pemilih + grafik
 function loadDataPemilih(){
-    fetch(SCRIPT_URL)
+    fetch(`${SCRIPT_URL}?action=data`)
     .then(res=>res.json())
     .then(data=>{
         let html="";
+        let hasil = {};
         for(let i=1;i<data.length;i++){
-            html += `<tr><td>${data[i][0]}</td><td>${data[i][1]}</td><td>${data[i][2]}</td></tr>`;
+            let nama = data[i][0];
+            let pilihan = data[i][1];
+            let waktu = data[i][2];
+            html += `<tr><td>${nama}</td><td>${pilihan}</td><td>${waktu}</td></tr>`;
+            if(pilihan){ hasil[pilihan] = (hasil[pilihan]||0)+1; }
         }
         document.getElementById("dataPemilih").innerHTML = html;
+
+        const ctx = document.getElementById('grafikVoting').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(hasil),
+                datasets: [{
+                    label: 'Jumlah Suara',
+                    data: Object.values(hasil),
+                    backgroundColor: ['#FFD700','#00BFFF']
+                }]
+            }
+        });
     });
 }
 </script>
