@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pemilihan Ketua OSIS</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+.card img { height: 160px; object-fit: cover; }
+.btn-vote { background-color: hotpink; border: none; color: white; width: 100%; }
+.btn-vote:hover { background-color: deeppink; }
+.hidden { display: none; }
+</style>
+</head>
+<body class="bg-light">
+
+<div class="container py-3">
+    <h3 class="text-center mb-3">Pemilihan Ketua OSIS</h3>
+
+    <!-- Login Pemilih -->
+    <div id="loginPemilih">
+        <input id="namaPemilih" class="form-control mb-2" placeholder="Masukkan Nama">
+        <button class="btn btn-primary w-100" onclick="mulaiVoting()">Mulai Voting</button>
+        <hr>
+        <button class="btn btn-secondary w-100" onclick="tampilLoginAdmin()">Login Admin</button>
+    </div>
+
+    <!-- Voting -->
+    <div id="halamanVoting" class="hidden">
+        <div class="row g-3">
+            <div class="col-6">
+                <div class="card">
+                    <img src="https://via.placeholder.com/300x200?text=Kandidat+1">
+                    <div class="card-body text-center">
+                        <h6>Kandidat 1</h6>
+                        <button class="btn btn-vote" onclick="pilih('Kandidat 1')">Pilih</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="card">
+                    <img src="https://via.placeholder.com/300x200?text=Kandidat+2">
+                    <div class="card-body text-center">
+                        <h6>Kandidat 2</h6>
+                        <button class="btn btn-vote" onclick="pilih('Kandidat 2')">Pilih</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Admin -->
+    <div id="loginAdmin" class="hidden">
+        <input id="adminUser" class="form-control mb-2" placeholder="Username">
+        <input id="adminPass" type="password" class="form-control mb-2" placeholder="Password">
+        <button class="btn btn-success w-100" onclick="loginAdmin()">Login Admin</button>
+    </div>
+
+    <!-- Halaman Admin -->
+    <div id="halamanAdmin" class="hidden">
+        <h5>Data Pemilih</h5>
+        <table class="table table-bordered">
+            <thead><tr><th>Nama</th><th>Pilihan</th><th>Waktu</th></tr></thead>
+            <tbody id="dataPemilih"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxlPvRvnSjektxnj4JId2nfKQ2g4sbI5CaKDXX3z1Q07alT4H0msMDguNQww3Gzordotw/exec";
+let namaPemilih = "";
+
+// Mulai voting
+function mulaiVoting(){
+    namaPemilih = document.getElementById("namaPemilih").value.trim();
+    if(namaPemilih === "") return alert("Masukkan nama Anda!");
+    document.getElementById("loginPemilih").classList.add("hidden");
+    document.getElementById("halamanVoting").classList.remove("hidden");
+}
+
+// Pilih kandidat
+function pilih(kandidat){
+    fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({nama: namaPemilih, kandidat: kandidat})
+    }).then(res=>res.json())
+    .then(data=>{
+        alert(data.pesan);
+        location.reload();
+    });
+}
+
+// Tampil login admin
+function tampilLoginAdmin(){
+    document.getElementById("loginPemilih").classList.add("hidden");
+    document.getElementById("loginAdmin").classList.remove("hidden");
+}
+
+// Login admin (2 admin)
+function loginAdmin(){
+    const user = document.getElementById("adminUser").value;
+    const pass = document.getElementById("adminPass").value;
+    if((user==="admin1" && pass==="pass1") || (user==="admin2" && pass==="pass2")){
+        document.getElementById("loginAdmin").classList.add("hidden");
+        document.getElementById("halamanAdmin").classList.remove("hidden");
+        loadDataPemilih();
+    } else {
+        alert("Username/Password salah!");
+    }
+}
+
+// Load data pemilih dari Google Sheets
+function loadDataPemilih(){
+    fetch(SCRIPT_URL)
+    .then(res=>res.json())
+    .then(data=>{
+        let html="";
+        for(let i=1;i<data.length;i++){
+            html += `<tr><td>${data[i][0]}</td><td>${data[i][1]}</td><td>${data[i][2]}</td></tr>`;
+        }
+        document.getElementById("dataPemilih").innerHTML = html;
+    });
+}
+</script>
+</body>
+</html>
