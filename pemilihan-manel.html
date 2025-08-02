@@ -1,0 +1,231 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pemilihan MANEL</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      color: white;
+      background: url('https://i.imgur.com/Upmt0q2.jpeg') no-repeat center top 30% fixed;
+      background-size: cover;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+      z-index: -1;
+    }
+    .hidden { display: none; }
+    .container-box {
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(10px);
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    }
+    .nav-tabs .nav-link.active {
+      background: linear-gradient(90deg, #FF1493, #FF69B4);
+      color: white !important;
+    }
+    .card-menu {
+      width: 220px;
+      background: #ffe4e9;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(255,20,147,0.3);
+      margin: 0 10px;
+    }
+    .card-menu img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+    }
+    .card-menu h6 { color: black; font-weight: bold; margin-top: 5px; }
+    .btn-vote {
+      background: linear-gradient(90deg, #FF1493, #FF69B4);
+      border: none;
+      color: white;
+      border-radius: 20px;
+    }
+    .scroll-container {
+      display: flex;
+      overflow-x: auto;
+      padding-bottom: 10px;
+    }
+    .scroll-container::-webkit-scrollbar { display: none; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: flex; }
+    .admin-section {
+      background: white; color: black;
+      border-radius: 15px; padding: 15px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container py-4">
+    <div class="container-box">
+      <h2 class="text-center mb-4 fw-bold">Pemilihan MANEL</h2>
+
+      <div id="loginPemilih" class="text-center">
+        <input id="namaPemilih" class="form-control mb-3" placeholder="Masukkan Nama">
+        <button class="btn btn-vote w-100 mb-3" onclick="cekKode()">Mulai Voting</button>
+        <hr>
+        <button class="btn btn-light w-100" onclick="tampilLoginAdmin()">Login Admin</button>
+      </div>
+
+      <div id="halamanVoting" class="hidden">
+        <ul class="nav nav-tabs mb-3">
+          <li class="nav-item"><button class="nav-link active" onclick="showTab(0)">Ketua</button></li>
+          <li class="nav-item"><button class="nav-link" onclick="showTab(1)">Divisi Kegiatan</button></li>
+          <li class="nav-item"><button class="nav-link" onclick="showTab(2)">Divisi Humas</button></li>
+        </ul>
+
+        <div id="tabKetua" class="tab-panel active scroll-container">
+          <div class="card-menu"><img src="https://i.imgur.com/yreXHcB.jpeg"><div class="p-2 text-center"><h6>Ais dan Keysha</h6><button class="btn btn-vote w-100 mt-2" onclick="pilih('ketua','Ais dan Keysha')">Pilih</button></div></div>
+          <div class="card-menu"><img src="https://i.imgur.com/Ihlqxv8.jpeg"><div class="p-2 text-center"><h6>Safa dan Belva</h6><button class="btn btn-vote w-100 mt-2" onclick="pilih('ketua','Safa dan Belva')">Pilih</button></div></div>
+        </div>
+
+        <div id="tabDivisiA" class="tab-panel scroll-container">
+          <div class="card-menu"><img src="https://i.imgur.com/A9Ligty.jpeg"><div class="p-2 text-center"><h6>Zolla</h6><button class="btn btn-vote w-100 mt-2" onclick="pilih('kegiatan','Zolla')">Pilih</button></div></div>
+          <div class="card-menu"><img src="https://i.imgur.com/PFcXDFt.jpeg"><div class="p-2 text-center"><h6>Wilis</h6><button class="btn btn-vote w-100 mt-2" onclick="pilih('kegiatan','Wilis')">Pilih</button></div></div>
+        </div>
+
+        <div id="tabDivisiB" class="tab-panel scroll-container">
+          <div class="card-menu"><img src="https://i.imgur.com/tpBAdgO.jpeg"><div class="p-2 text-center"><h6>Eliana</h6><button class="btn btn-vote w-100 mt-2" onclick="pilih('humas','Eliana')">Pilih</button></div></div>
+          <div class="card-menu"><img src="https://i.imgur.com/neuHJpM.jpeg"><div class="p-2 text-center"><h6>Dinda</h6><button class="btn btn-vote w-100 mt-2" onclick="pilih('humas','Dinda')">Pilih</button></div></div>
+        </div>
+      </div>
+
+      <div id="loginAdmin" class="hidden text-center">
+        <div class="admin-section">
+          <h5 class="fw-bold mb-3">Login Admin</h5>
+          <input id="adminUser" class="form-control mb-2" placeholder="Username">
+          <input id="adminPass" type="password" class="form-control mb-3" placeholder="Password">
+          <button class="btn btn-success w-100" onclick="loginAdmin()">Login</button>
+        </div>
+      </div>
+
+      <div id="halamanAdmin" class="hidden admin-section mt-4">
+        <h5 class="fw-bold">📋 Data Pemilih</h5>
+        <div class="table-responsive"><table class="table table-bordered table-sm table-striped mt-2"><thead class="table-dark"><tr><th>Nama</th><th>Ketua</th><th>Kegiatan</th><th>Humas</th><th>Waktu</th></tr></thead><tbody id="dataPemilih"></tbody></table></div>
+        <h5 class="fw-bold text-dark mt-4 text-center">📊 Grafik Voting</h5>
+        <canvas id="grafikKetua" height="100" class="mt-4"></canvas>
+        <canvas id="grafikKegiatan" height="100" class="mt-4"></canvas>
+        <canvas id="grafikHumas" height="100" class="mt-4"></canvas>
+      </div>
+    </div>
+  </div>
+
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwL5DD9Ffqjv7rFSgUWQzTMWOk04CURdLOnZiGvZovkp4jXgvopxdb0z8Gtt71Bh_UwSQ/exec";
+let namaPemilih = "", voteKetua = "", voteKegiatan = "", voteHumas = "";
+
+function cekKode(){
+  namaPemilih = document.getElementById("namaPemilih").value.trim();
+  if(namaPemilih === "") return alert("Masukkan Nama!");
+  fetch(`${SCRIPT_URL}?action=cekNama&nama=${encodeURIComponent(namaPemilih)}`)
+    .then(res=>res.json())
+    .then(data=>{
+      if(data.sudahMemilih) alert("Anda sudah melakukan voting.");
+      else {
+        document.getElementById("loginPemilih").classList.add("hidden");
+        document.getElementById("halamanVoting").classList.remove("hidden");
+      }
+    });
+}
+
+function pilih(kategori, nama){
+  if(kategori==="ketua" && voteKetua) return alert("Sudah memilih Ketua.");
+  if(kategori==="kegiatan" && voteKegiatan) return alert("Sudah memilih Kegiatan.");
+  if(kategori==="humas" && voteHumas) return alert("Sudah memilih Humas.");
+
+  if(kategori==="ketua") voteKetua = nama;
+  if(kategori==="kegiatan") voteKegiatan = nama;
+  if(kategori==="humas") voteHumas = nama;
+
+  alert(`Berhasil memilih ${nama} untuk ${kategori}`);
+
+  if (voteKetua && voteKegiatan && voteHumas) {
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    headers: {
+      "Content-Type": "application/json" // ⬅️ WAJIB DITAMBAHKAN!
+    },
+    body: JSON.stringify({
+      nama: namaPemilih,
+      ketua: voteKetua,
+      kegiatan: voteKegiatan,
+      humas: voteHumas
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    alert(data.pesan || "Voting selesai!");
+    document.getElementById("halamanVoting").classList.add("hidden");
+  })
+  .catch(err => alert("❌ Gagal menyimpan vote: " + err.message));
+}
+
+}
+
+function showTab(index){
+  document.querySelectorAll('.nav-link').forEach((btn, i) => btn.classList.toggle('active', i===index));
+  const panels = [document.getElementById("tabKetua"), document.getElementById("tabDivisiA"), document.getElementById("tabDivisiB")];
+  panels.forEach((panel, i) => panel.classList.toggle('active', i===index));
+}
+
+function tampilLoginAdmin(){
+  document.getElementById("loginPemilih").classList.add("hidden");
+  document.getElementById("loginAdmin").classList.remove("hidden");
+}
+
+function loginAdmin(){
+  const user = document.getElementById("adminUser").value;
+  const pass = document.getElementById("adminPass").value;
+  if(user==="admin" && pass==="admin123"){
+    document.getElementById("loginAdmin").classList.add("hidden");
+    document.getElementById("halamanAdmin").classList.remove("hidden");
+    loadDataPemilih();
+  } else alert("Username/Password salah!");
+}
+
+function loadDataPemilih(){
+  fetch(`${SCRIPT_URL}?action=data`)
+  .then(res=>res.json())
+  .then(data=>{
+    let html = "", hasilKetua = {}, hasilKegiatan = {}, hasilHumas = {};
+    for(let i=1; i<data.length; i++){
+      const [nama, ketua, kegiatan, humas, waktu] = data[i];
+      html += `<tr><td>${nama}</td><td>${ketua}</td><td>${kegiatan}</td><td>${humas}</td><td>${waktu}</td></tr>`;
+      if(ketua) hasilKetua[ketua] = (hasilKetua[ketua] || 0) + 1;
+      if(kegiatan) hasilKegiatan[kegiatan] = (hasilKegiatan[kegiatan] || 0) + 1;
+      if(humas) hasilHumas[humas] = (hasilHumas[humas] || 0) + 1;
+    }
+    document.getElementById("dataPemilih").innerHTML = html;
+    renderChart("grafikKetua", hasilKetua);
+    renderChart("grafikKegiatan", hasilKegiatan);
+    renderChart("grafikHumas", hasilHumas);
+  });
+}
+
+function renderChart(id, data){
+  const ctx = document.getElementById(id).getContext("2d");
+  new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: Object.keys(data),
+      datasets: [{ label: "Jumlah Suara", data: Object.values(data), backgroundColor: "#FF69B4" }]
+    }
+  });
+}
+</script>
+</body>
+</html>
