@@ -154,10 +154,18 @@ function pilih(kategori, nama){
   alert(`Berhasil memilih ${nama} untuk ${kategori}`);
 
   if (voteKetua && voteKegiatan && voteHumas) {
+  console.log("Kirim vote ke:", SCRIPT_URL);
+  console.log("Data vote:", {
+    nama: namaPemilih,
+    ketua: voteKetua,
+    kegiatan: voteKegiatan,
+    humas: voteHumas
+  });
+
   fetch(SCRIPT_URL, {
     method: 'POST',
     headers: {
-      "Content-Type": "application/json" // ⬅️ WAJIB DITAMBAHKAN!
+      "Content-Type": "application/json"
     },
     body: JSON.stringify({
       nama: namaPemilih,
@@ -168,10 +176,14 @@ function pilih(kategori, nama){
   })
   .then(res => res.json())
   .then(data => {
+    console.log("Response dari Apps Script:", data);
     alert(data.pesan || "Voting selesai!");
     document.getElementById("halamanVoting").classList.add("hidden");
   })
-  .catch(err => alert("❌ Gagal menyimpan vote: " + err.message));
+  .catch(err => {
+    console.error("❌ Gagal fetch", err);
+    alert("❌ Gagal menyimpan vote: " + err.message);
+  });
 }
 
 }
