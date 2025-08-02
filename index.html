@@ -154,38 +154,19 @@ function pilih(kategori, nama){
   alert(`Berhasil memilih ${nama} untuk ${kategori}`);
 
   if (voteKetua && voteKegiatan && voteHumas) {
-  console.log("Kirim vote ke:", SCRIPT_URL);
-  console.log("Data vote:", {
-    nama: namaPemilih,
-    ketua: voteKetua,
-    kegiatan: voteKegiatan,
-    humas: voteHumas
-  });
-
-  fetch(SCRIPT_URL, {
-    method: 'POST',
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      nama: namaPemilih,
-      ketua: voteKetua,
-      kegiatan: voteKegiatan,
-      humas: voteHumas
-    })
-  })
-  .then(res => res.json())
-  .then(data => {
-    console.log("Response dari Apps Script:", data);
-    alert(data.pesan || "Voting selesai!");
-    document.getElementById("halamanVoting").classList.add("hidden");
-  })
-  .catch(err => {
-    console.error("❌ Gagal fetch", err);
-    alert("❌ Gagal menyimpan vote: " + err.message);
-  });
-}
-
+    const url = `${SCRIPT_URL}?action=simpan&nama=${encodeURIComponent(namaPemilih)}&ketua=${encodeURIComponent(voteKetua)}&kegiatan=${encodeURIComponent(voteKegiatan)}&humas=${encodeURIComponent(voteHumas)}`;
+    
+    fetch(url)
+      .then(res => res.json())
+      .then(data => {
+        alert(data.pesan || "Voting selesai!");
+        document.getElementById("halamanVoting").classList.add("hidden");
+      })
+      .catch(err => {
+        console.error("❌ Gagal fetch", err);
+        alert("❌ Gagal menyimpan vote: " + err.message);
+      });
+  }
 }
 
 function showTab(index){
@@ -241,4 +222,3 @@ function renderChart(id, data){
 </script>
 </body>
 </html>
-
